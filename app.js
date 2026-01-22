@@ -1,123 +1,128 @@
 // API Configurations
+const SWAPI_ENDPOINT = 'https://swapi-graphql.netlify.app/.netlify/functions/index';
+
 const APIs = {
-    countries: {
-        name: 'Countries API',
-        endpoint: 'https://countries.trevorblades.com/graphql',
+    characters: {
+        name: 'Characters',
+        endpoint: SWAPI_ENDPOINT,
         examples: [
             {
-                title: 'List All Countries',
-                description: 'Get country names and codes',
-                query: `query GetCountries {
-  countries {
-    code
-    name
-    capital
-    currency
-    emoji
-  }
-}`
-            },
-            {
-                title: 'Country Details',
-                description: 'Query a specific country',
-                query: `query GetCountry {
-  country(code: "US") {
-    name
-    native
-    capital
-    currency
-    languages {
-      code
+                title: 'All Characters',
+                description: 'List all people in the galaxy',
+                query: `query AllPeople {
+  allPeople {
+    totalCount
+    people {
       name
-    }
-    states {
-      name
+      birthYear
+      gender
+      homeworld {
+        name
+      }
     }
   }
 }`
             },
             {
-                title: 'Continents & Countries',
-                description: 'Nested continent data',
-                query: `query GetContinents {
-  continents {
-    code
+                title: 'Character Details',
+                description: 'Get Luke Skywalker info',
+                query: `query GetPerson {
+  person(id: "cGVvcGxlOjE=") {
     name
-    countries {
+    birthYear
+    eyeColor
+    hairColor
+    height
+    mass
+    gender
+    homeworld {
       name
-      capital
-      emoji
+      climate
+      terrain
+    }
+    filmConnection {
+      films {
+        title
+      }
     }
   }
 }`
             },
             {
-                title: 'Filter by Continent',
-                description: 'Countries in Europe',
-                query: `query EuropeanCountries {
-  countries(filter: { continent: { eq: "EU" } }) {
-    name
-    capital
-    currency
-    emoji
+                title: 'Characters with Pagination',
+                description: 'Paginated people query',
+                query: `query PaginatedPeople {
+  allPeople(first: 5) {
+    totalCount
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+    edges {
+      node {
+        name
+        birthYear
+        species {
+          name
+        }
+      }
+      cursor
+    }
+  }
+}`
+            },
+            {
+                title: 'Character Starships',
+                description: 'Ships piloted by characters',
+                query: `query CharacterStarships {
+  allPeople(first: 5) {
+    people {
+      name
+      starshipConnection {
+        starships {
+          name
+          model
+          starshipClass
+        }
+      }
+    }
   }
 }`
             }
         ]
     },
-    rickmorty: {
-        name: 'Rick & Morty API',
-        endpoint: 'https://rickandmortyapi.com/graphql',
+    films: {
+        name: 'Films',
+        endpoint: SWAPI_ENDPOINT,
         examples: [
             {
-                title: 'Character List',
-                description: 'Get characters with pagination',
-                query: `query GetCharacters {
-  characters(page: 1) {
-    info {
-      count
-      pages
-      next
-    }
-    results {
-      id
-      name
-      status
-      species
-      image
+                title: 'All Films',
+                description: 'List all Star Wars films',
+                query: `query AllFilms {
+  allFilms {
+    totalCount
+    films {
+      title
+      episodeID
+      releaseDate
+      director
+      producers
     }
   }
 }`
             },
             {
-                title: 'Filter Characters',
-                description: 'Search by name and status',
-                query: `query FilterCharacters {
-  characters(filter: { name: "Rick", status: "Alive" }) {
-    results {
-      id
-      name
-      status
-      origin {
-        name
-      }
-      location {
-        name
-      }
-    }
-  }
-}`
-            },
-            {
-                title: 'Episodes List',
-                description: 'Get episode information',
-                query: `query GetEpisodes {
-  episodes(page: 1) {
-    results {
-      id
-      name
-      air_date
-      episode
+                title: 'Film Details',
+                description: 'A New Hope details',
+                query: `query FilmDetails {
+  film(id: "ZmlsbXM6MQ==") {
+    title
+    episodeID
+    openingCrawl
+    director
+    producers
+    releaseDate
+    characterConnection {
       characters {
         name
       }
@@ -126,17 +131,36 @@ const APIs = {
 }`
             },
             {
-                title: 'Locations',
-                description: 'Explore different locations',
-                query: `query GetLocations {
-  locations(page: 1) {
-    results {
-      id
-      name
-      type
-      dimension
-      residents {
-        name
+                title: 'Film Planets',
+                description: 'Planets featured in films',
+                query: `query FilmPlanets {
+  allFilms {
+    films {
+      title
+      planetConnection {
+        planets {
+          name
+          climate
+          terrain
+        }
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Film Species',
+                description: 'Species appearing in films',
+                query: `query FilmSpecies {
+  allFilms {
+    films {
+      title
+      speciesConnection {
+        species {
+          name
+          classification
+          language
+        }
       }
     }
   }
@@ -144,72 +168,82 @@ const APIs = {
             }
         ]
     },
-    spacex: {
-        name: 'SpaceX API',
-        endpoint: 'https://spacex-production.up.railway.app/graphql',
+    starships: {
+        name: 'Starships & Planets',
+        endpoint: SWAPI_ENDPOINT,
         examples: [
             {
-                title: 'Past Launches',
-                description: 'Recent SpaceX launches',
-                query: `query PastLaunches {
-  launchesPast(limit: 5) {
-    mission_name
-    launch_date_local
-    launch_site {
-      site_name_long
-    }
-    rocket {
-      rocket_name
-    }
-    links {
-      video_link
-    }
-  }
-}`
-            },
-            {
-                title: 'Rocket Details',
-                description: 'Information about rockets',
-                query: `query GetRockets {
-  rockets {
-    id
-    name
-    type
-    active
-    cost_per_launch
-    success_rate_pct
-    description
-  }
-}`
-            },
-            {
-                title: 'Company Info',
-                description: 'SpaceX company details',
-                query: `query CompanyInfo {
-  company {
-    name
-    founder
-    founded
-    employees
-    vehicles
-    launch_sites
-    valuation
-    summary
-  }
-}`
-            },
-            {
-                title: 'Ships',
-                description: 'SpaceX fleet vessels',
-                query: `query GetShips {
-  ships {
-    name
-    type
-    active
-    home_port
-    year_built
-    missions {
+                title: 'All Starships',
+                description: 'List all starships',
+                query: `query AllStarships {
+  allStarships {
+    totalCount
+    starships {
       name
+      model
+      starshipClass
+      manufacturers
+      costInCredits
+      maxAtmospheringSpeed
+      hyperdriveRating
+    }
+  }
+}`
+            },
+            {
+                title: 'All Planets',
+                description: 'Explore the galaxy',
+                query: `query AllPlanets {
+  allPlanets {
+    totalCount
+    planets {
+      name
+      diameter
+      rotationPeriod
+      orbitalPeriod
+      gravity
+      population
+      climate
+      terrain
+    }
+  }
+}`
+            },
+            {
+                title: 'All Vehicles',
+                description: 'Ground and air vehicles',
+                query: `query AllVehicles {
+  allVehicles {
+    totalCount
+    vehicles {
+      name
+      model
+      vehicleClass
+      manufacturers
+      costInCredits
+      maxAtmospheringSpeed
+      crew
+      passengers
+    }
+  }
+}`
+            },
+            {
+                title: 'All Species',
+                description: 'Species across the galaxy',
+                query: `query AllSpecies {
+  allSpecies {
+    totalCount
+    species {
+      name
+      classification
+      designation
+      averageHeight
+      averageLifespan
+      language
+      homeworld {
+        name
+      }
     }
   }
 }`
@@ -219,7 +253,7 @@ const APIs = {
 };
 
 // State
-let currentAPI = 'countries';
+let currentAPI = 'characters';
 
 // DOM Elements
 const apiSelector = document.getElementById('apiSelector');
