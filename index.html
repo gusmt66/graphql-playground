@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphQL API Explorer | Portfolio Showcase</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #e535ab;
+            --primary-dark: #c92d96;
+            --secondary: #1a1a2e;
+            --accent: #00d4ff;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-input: #252542;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --border: #2d2d4a;
+            --success: #00c853;
+            --error: #ff5252;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--bg-dark) 100%);
+            border-bottom: 1px solid var(--border);
+            padding: 1.5rem 2rem;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo svg {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-input);
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Layout */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* API Selector */
+        .api-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .api-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 1.25rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .api-card.active {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(229, 53, 171, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+        }
+
+        .api-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .api-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .api-icon {
+            font-size: 1.25rem;
+        }
+
+        /* Editor Section */
+        .editor-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .editor-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            background: var(--bg-input);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+        }
+
+        .query-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        .query-editor::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .result-display {
+            min-height: 300px;
+            max-height: 500px;
+            overflow: auto;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .result-display.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Variables Section */
+        .variables-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .variables-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .variables-toggle:hover {
+            border-color: var(--primary);
+        }
+
+        .variables-panel {
+            display: none;
+            margin-top: 0.5rem;
+        }
+
+        .variables-panel.show {
+            display: block;
+        }
+
+        .variables-editor {
+            width: 100%;
+            min-height: 100px;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            resize: vertical;
+            outline: none;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(229, 53, 171, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+        }
+
+        /* Example Queries */
+        .examples-section {
+            margin-bottom: 2rem;
+        }
+
+        .examples-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .examples-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .example-card {
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .example-card:hover {
+            border-color: var(--accent);
+            background: var(--bg-input);
+        }
+
+        .example-card h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .example-card p {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Info Section */
+        .info-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .info-card {
+            padding: 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+        }
+
+        .info-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .info-card ul {
+            list-style: none;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .info-card li {
+            padding: 0.25rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .info-card li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+        }
+
+        /* JSON Syntax Highlighting */
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-boolean { color: #569cd6; }
+        .json-null { color: #569cd6; }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Response Time */
+        .response-meta {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .response-meta span {
+            margin-left: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M50 0L93.3 25V75L50 100L6.7 75V25L50 0Z" fill="#E535AB"/>
+                    <circle cx="50" cy="50" r="10" fill="white"/>
+                    <circle cx="50" cy="20" r="6" fill="white"/>
+                    <circle cx="76" cy="35" r="6" fill="white"/>
+                    <circle cx="76" cy="65" r="6" fill="white"/>
+                    <circle cx="50" cy="80" r="6" fill="white"/>
+                    <circle cx="24" cy="65" r="6" fill="white"/>
+                    <circle cx="24" cy="35" r="6" fill="white"/>
+                    <line x1="50" y1="20" x2="50" y2="40" stroke="white" stroke-width="2"/>
+                    <line x1="76" y1="35" x2="60" y2="45" stroke="white" stroke-width="2"/>
+                    <line x1="76" y1="65" x2="60" y2="55" stroke="white" stroke-width="2"/>
+                    <line x1="50" y1="80" x2="50" y2="60" stroke="white" stroke-width="2"/>
+                    <line x1="24" y1="65" x2="40" y2="55" stroke="white" stroke-width="2"/>
+                    <line x1="24" y1="35" x2="40" y2="45" stroke="white" stroke-width="2"/>
+                </svg>
+                <h1>GraphQL Explorer</h1>
+            </div>
+            <div class="header-info">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>Live APIs Connected</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- API Selection -->
+        <section class="api-selector" id="apiSelector">
+            <div class="api-card active" data-api="countries">
+                <h3><span class="api-icon">🌍</span> Countries API</h3>
+                <p>Query countries, continents, and languages</p>
+            </div>
+            <div class="api-card" data-api="rickmorty">
+                <h3><span class="api-icon">👽</span> Rick & Morty API</h3>
+                <p>Characters, episodes, and locations</p>
+            </div>
+            <div class="api-card" data-api="spacex">
+                <h3><span class="api-icon">🚀</span> SpaceX API</h3>
+                <p>Launches, rockets, and missions</p>
+            </div>
+        </section>
+
+        <!-- Example Queries -->
+        <section class="examples-section">
+            <h2>Quick Examples — Click to load</h2>
+            <div class="examples-grid" id="examplesGrid"></div>
+        </section>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-primary" id="executeBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                Execute Query
+            </button>
+            <button class="btn btn-secondary" id="prettifyBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+                </svg>
+                Prettify
+            </button>
+            <button class="btn btn-secondary" id="copyBtn">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/>
+                </svg>
+                Copy Result
+            </button>
+        </div>
+
+        <!-- Variables Toggle -->
+        <div class="variables-section">
+            <button class="variables-toggle" id="variablesToggle">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+                </svg>
+                Query Variables (JSON)
+            </button>
+            <div class="variables-panel" id="variablesPanel">
+                <textarea class="variables-editor" id="variablesEditor" placeholder='{"key": "value"}'>{}</textarea>
+            </div>
+        </div>
+
+        <!-- Editor Section -->
+        <section class="editor-section">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Query Editor</span>
+                    <span class="response-meta" id="endpointDisplay"></span>
+                </div>
+                <textarea class="query-editor" id="queryEditor" placeholder="Write your GraphQL query here..."></textarea>
+            </div>
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Response</span>
+                    <span class="response-meta" id="responseMeta"></span>
+                </div>
+                <div class="result-display" id="resultDisplay">
+                    <span style="color: var(--text-secondary)">// Results will appear here after executing a query</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info Section -->
+        <section class="info-section">
+            <div class="info-card">
+                <h3>🎯 GraphQL Advantages</h3>
+                <ul>
+                    <li>Request exactly the data you need</li>
+                    <li>Single endpoint for all operations</li>
+                    <li>Strongly typed schema</li>
+                    <li>Real-time updates with subscriptions</li>
+                    <li>Self-documenting API</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>⚡ Key Concepts Demonstrated</h3>
+                <ul>
+                    <li>Queries with field selection</li>
+                    <li>Query variables for dynamic inputs</li>
+                    <li>Nested object resolution</li>
+                    <li>Pagination and filtering</li>
+                    <li>Error handling patterns</li>
+                </ul>
+            </div>
+            <div class="info-card">
+                <h3>🛠️ Technical Implementation</h3>
+                <ul>
+                    <li>Fetch API for HTTP requests</li>
+                    <li>POST method with JSON body</li>
+                    <li>Content-Type: application/json</li>
+                    <li>Response parsing and rendering</li>
+                    <li>Error boundary handling</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>Built with vanilla JavaScript to demonstrate GraphQL fundamentals</p>
+        <p style="margin-top: 0.5rem;">
+            APIs: <a href="https://countries.trevorblades.com" target="_blank">Countries</a> •
+            <a href="https://rickandmortyapi.com" target="_blank">Rick & Morty</a> •
+            <a href="https://api.spacex.land/graphql" target="_blank">SpaceX</a>
+        </p>
+    </footer>
+
+    <script>
+        // API Configurations
+        const APIs = {
+            countries: {
+                name: 'Countries API',
+                endpoint: 'https://countries.trevorblades.com/graphql',
+                examples: [
+                    {
+                        title: 'List All Countries',
+                        description: 'Get country names and codes',
+                        query: `query GetCountries {
+  countries {
+    code
+    name
+    capital
+    currency
+    emoji
+  }
+}`
+                    },
+                    {
+                        title: 'Country Details',
+                        description: 'Query a specific country',
+                        query: `query GetCountry {
+  country(code: "US") {
+    name
+    native
+    capital
+    currency
+    languages {
+      code
+      name
+    }
+    states {
+      name
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Continents & Countries',
+                        description: 'Nested continent data',
+                        query: `query GetContinents {
+  continents {
+    code
+    name
+    countries {
+      name
+      capital
+      emoji
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Filter by Continent',
+                        description: 'Countries in Europe',
+                        query: `query EuropeanCountries {
+  countries(filter: { continent: { eq: "EU" } }) {
+    name
+    capital
+    currency
+    emoji
+  }
+}`
+                    }
+                ]
+            },
+            rickmorty: {
+                name: 'Rick & Morty API',
+                endpoint: 'https://rickandmortyapi.com/graphql',
+                examples: [
+                    {
+                        title: 'Character List',
+                        description: 'Get characters with pagination',
+                        query: `query GetCharacters {
+  characters(page: 1) {
+    info {
+      count
+      pages
+      next
+    }
+    results {
+      id
+      name
+      status
+      species
+      image
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Filter Characters',
+                        description: 'Search by name and status',
+                        query: `query FilterCharacters {
+  characters(filter: { name: "Rick", status: "Alive" }) {
+    results {
+      id
+      name
+      status
+      origin {
+        name
+      }
+      location {
+        name
+      }
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Episodes List',
+                        description: 'Get episode information',
+                        query: `query GetEpisodes {
+  episodes(page: 1) {
+    results {
+      id
+      name
+      air_date
+      episode
+      characters {
+        name
+      }
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Locations',
+                        description: 'Explore different locations',
+                        query: `query GetLocations {
+  locations(page: 1) {
+    results {
+      id
+      name
+      type
+      dimension
+      residents {
+        name
+      }
+    }
+  }
+}`
+                    }
+                ]
+            },
+            spacex: {
+                name: 'SpaceX API',
+                endpoint: 'https://spacex-production.up.railway.app/graphql',
+                examples: [
+                    {
+                        title: 'Past Launches',
+                        description: 'Recent SpaceX launches',
+                        query: `query PastLaunches {
+  launchesPast(limit: 5) {
+    mission_name
+    launch_date_local
+    launch_site {
+      site_name_long
+    }
+    rocket {
+      rocket_name
+    }
+    links {
+      video_link
+    }
+  }
+}`
+                    },
+                    {
+                        title: 'Rocket Details',
+                        description: 'Information about rockets',
+                        query: `query GetRockets {
+  rockets {
+    id
+    name
+    type
+    active
+    cost_per_launch
+    success_rate_pct
+    description
+  }
+}`
+                    },
+                    {
+                        title: 'Company Info',
+                        description: 'SpaceX company details',
+                        query: `query CompanyInfo {
+  company {
+    name
+    founder
+    founded
+    employees
+    vehicles
+    launch_sites
+    valuation
+    summary
+  }
+}`
+                    },
+                    {
+                        title: 'Ships',
+                        description: 'SpaceX fleet vessels',
+                        query: `query GetShips {
+  ships {
+    name
+    type
+    active
+    home_port
+    year_built
+    missions {
+      name
+    }
+  }
+}`
+                    }
+                ]
+            }
+        };
+
+        // State
+        let currentAPI = 'countries';
+
+        // DOM Elements
+        const apiSelector = document.getElementById('apiSelector');
+        const examplesGrid = document.getElementById('examplesGrid');
+        const queryEditor = document.getElementById('queryEditor');
+        const variablesEditor = document.getElementById('variablesEditor');
+        const resultDisplay = document.getElementById('resultDisplay');
+        const executeBtn = document.getElementById('executeBtn');
+        const prettifyBtn = document.getElementById('prettifyBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const variablesToggle = document.getElementById('variablesToggle');
+        const variablesPanel = document.getElementById('variablesPanel');
+        const endpointDisplay = document.getElementById('endpointDisplay');
+        const responseMeta = document.getElementById('responseMeta');
+
+        // Initialize
+        function init() {
+            loadAPI(currentAPI);
+            setupEventListeners();
+        }
+
+        // Load API
+        function loadAPI(apiKey) {
+            currentAPI = apiKey;
+            const api = APIs[apiKey];
+
+            // Update active card
+            document.querySelectorAll('.api-card').forEach(card => {
+                card.classList.toggle('active', card.dataset.api === apiKey);
+            });
+
+            // Update endpoint display
+            endpointDisplay.textContent = api.endpoint;
+
+            // Load examples
+            examplesGrid.innerHTML = api.examples.map((example, index) => `
+                <div class="example-card" data-index="${index}">
+                    <h4>${example.title}</h4>
+                    <p>${example.description}</p>
+                </div>
+            `).join('');
+
+            // Load first example
+            loadExample(0);
+        }
+
+        // Load Example
+        function loadExample(index) {
+            const example = APIs[currentAPI].examples[index];
+            queryEditor.value = example.query;
+            resultDisplay.innerHTML = '<span style="color: var(--text-secondary)">// Click "Execute Query" to see results</span>';
+            responseMeta.textContent = '';
+        }
+
+        // Execute Query
+        async function executeQuery() {
+            const query = queryEditor.value.trim();
+            if (!query) {
+                showError('Please enter a GraphQL query');
+                return;
+            }
+
+            let variables = {};
+            try {
+                const varsText = variablesEditor.value.trim();
+                if (varsText) {
+                    variables = JSON.parse(varsText);
+                }
+            } catch (e) {
+                showError('Invalid JSON in variables: ' + e.message);
+                return;
+            }
+
+            // Show loading state
+            resultDisplay.innerHTML = '<div class="spinner"></div>';
+            resultDisplay.classList.add('loading');
+            responseMeta.textContent = 'Loading...';
+
+            const startTime = performance.now();
+
+            try {
+                const response = await fetch(APIs[currentAPI].endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query,
+                        variables
+                    })
+                });
+
+                const endTime = performance.now();
+                const duration = Math.round(endTime - startTime);
+
+                const data = await response.json();
+
+                resultDisplay.classList.remove('loading');
+                resultDisplay.innerHTML = syntaxHighlight(JSON.stringify(data, null, 2));
+
+                const status = data.errors ? '⚠️ With Errors' : '✓ Success';
+                responseMeta.innerHTML = `${status} <span>${duration}ms</span>`;
+
+            } catch (error) {
+                resultDisplay.classList.remove('loading');
+                showError('Network error: ' + error.message);
+                responseMeta.textContent = '✗ Failed';
+            }
+        }
+
+        // Show Error
+        function showError(message) {
+            resultDisplay.innerHTML = `<span style="color: var(--error)">Error: ${message}</span>`;
+        }
+
+        // Syntax Highlighting for JSON
+        function syntaxHighlight(json) {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                let cls = 'json-number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json-key';
+                    } else {
+                        cls = 'json-string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json-boolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json-null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+
+        // Prettify Query
+        function prettifyQuery() {
+            const query = queryEditor.value;
+            // Basic prettification - normalize whitespace and indentation
+            try {
+                let depth = 0;
+                let prettified = '';
+                let inString = false;
+
+                for (let i = 0; i < query.length; i++) {
+                    const char = query[i];
+                    const nextChar = query[i + 1];
+
+                    if (char === '"' && query[i - 1] !== '\\') {
+                        inString = !inString;
+                        prettified += char;
+                        continue;
+                    }
+
+                    if (inString) {
+                        prettified += char;
+                        continue;
+                    }
+
+                    if (char === '{' || char === '(') {
+                        depth++;
+                        prettified += char + '\n' + '  '.repeat(depth);
+                    } else if (char === '}' || char === ')') {
+                        depth--;
+                        prettified = prettified.trimEnd() + '\n' + '  '.repeat(depth) + char;
+                    } else if (char === '\n') {
+                        prettified += '\n' + '  '.repeat(depth);
+                    } else if (char === ' ' && (query[i - 1] === ' ' || query[i - 1] === '\n')) {
+                        // Skip extra spaces
+                    } else {
+                        prettified += char;
+                    }
+                }
+
+                queryEditor.value = prettified.trim();
+            } catch (e) {
+                // If prettification fails, leave as is
+            }
+        }
+
+        // Copy Result
+        function copyResult() {
+            const text = resultDisplay.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = copyBtn.innerHTML;
+                copyBtn.innerHTML = '✓ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // API Selection
+            apiSelector.addEventListener('click', (e) => {
+                const card = e.target.closest('.api-card');
+                if (card) {
+                    loadAPI(card.dataset.api);
+                }
+            });
+
+            // Example Selection
+            examplesGrid.addEventListener('click', (e) => {
+                const card = e.target.closest('.example-card');
+                if (card) {
+                    loadExample(parseInt(card.dataset.index));
+                }
+            });
+
+            // Buttons
+            executeBtn.addEventListener('click', executeQuery);
+            prettifyBtn.addEventListener('click', prettifyQuery);
+            copyBtn.addEventListener('click', copyResult);
+
+            // Variables Toggle
+            variablesToggle.addEventListener('click', () => {
+                variablesPanel.classList.toggle('show');
+            });
+
+            // Keyboard shortcut (Ctrl/Cmd + Enter to execute)
+            queryEditor.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    executeQuery();
+                }
+            });
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
