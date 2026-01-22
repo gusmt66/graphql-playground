@@ -1,22 +1,42 @@
 // API Configurations
-const SWAPI_ENDPOINT = 'https://swapi-graphql.netlify.app/.netlify/functions/index';
-
 const APIs = {
-    characters: {
-        name: 'Characters',
-        endpoint: SWAPI_ENDPOINT,
+    rickmorty: {
+        name: 'Rick & Morty API',
+        endpoint: 'https://rickandmortyapi.com/graphql',
         examples: [
             {
                 title: 'All Characters',
-                description: 'List all people in the galaxy',
-                query: `query AllPeople {
-  allPeople {
-    totalCount
-    people {
+                description: 'Get characters with pagination',
+                query: `query GetCharacters {
+  characters(page: 1) {
+    info {
+      count
+      pages
+      next
+    }
+    results {
+      id
       name
-      birthYear
-      gender
-      homeworld {
+      status
+      species
+      image
+    }
+  }
+}`
+            },
+            {
+                title: 'Filter Characters',
+                description: 'Search by name and status',
+                query: `query FilterCharacters {
+  characters(filter: { name: "Rick", status: "Alive" }) {
+    results {
+      id
+      name
+      status
+      origin {
+        name
+      }
+      location {
         name
       }
     }
@@ -24,105 +44,15 @@ const APIs = {
 }`
             },
             {
-                title: 'Character Details',
-                description: 'Get Luke Skywalker info',
-                query: `query GetPerson {
-  person(id: "cGVvcGxlOjE=") {
-    name
-    birthYear
-    eyeColor
-    hairColor
-    height
-    mass
-    gender
-    homeworld {
+                title: 'Episodes List',
+                description: 'Get episode information',
+                query: `query GetEpisodes {
+  episodes(page: 1) {
+    results {
+      id
       name
-      climate
-      terrain
-    }
-    filmConnection {
-      films {
-        title
-      }
-    }
-  }
-}`
-            },
-            {
-                title: 'Characters with Pagination',
-                description: 'Paginated people query',
-                query: `query PaginatedPeople {
-  allPeople(first: 5) {
-    totalCount
-    pageInfo {
-      hasNextPage
-      endCursor
-    }
-    edges {
-      node {
-        name
-        birthYear
-        species {
-          name
-        }
-      }
-      cursor
-    }
-  }
-}`
-            },
-            {
-                title: 'Character Starships',
-                description: 'Ships piloted by characters',
-                query: `query CharacterStarships {
-  allPeople(first: 5) {
-    people {
-      name
-      starshipConnection {
-        starships {
-          name
-          model
-          starshipClass
-        }
-      }
-    }
-  }
-}`
-            }
-        ]
-    },
-    films: {
-        name: 'Films',
-        endpoint: SWAPI_ENDPOINT,
-        examples: [
-            {
-                title: 'All Films',
-                description: 'List all Star Wars films',
-                query: `query AllFilms {
-  allFilms {
-    totalCount
-    films {
-      title
-      episodeID
-      releaseDate
-      director
-      producers
-    }
-  }
-}`
-            },
-            {
-                title: 'Film Details',
-                description: 'A New Hope details',
-                query: `query FilmDetails {
-  film(id: "ZmlsbXM6MQ==") {
-    title
-    episodeID
-    openingCrawl
-    director
-    producers
-    releaseDate
-    characterConnection {
+      air_date
+      episode
       characters {
         name
       }
@@ -131,36 +61,17 @@ const APIs = {
 }`
             },
             {
-                title: 'Film Planets',
-                description: 'Planets featured in films',
-                query: `query FilmPlanets {
-  allFilms {
-    films {
-      title
-      planetConnection {
-        planets {
-          name
-          climate
-          terrain
-        }
-      }
-    }
-  }
-}`
-            },
-            {
-                title: 'Film Species',
-                description: 'Species appearing in films',
-                query: `query FilmSpecies {
-  allFilms {
-    films {
-      title
-      speciesConnection {
-        species {
-          name
-          classification
-          language
-        }
+                title: 'Locations',
+                description: 'Explore different dimensions',
+                query: `query GetLocations {
+  locations(page: 1) {
+    results {
+      id
+      name
+      type
+      dimension
+      residents {
+        name
       }
     }
   }
@@ -168,81 +79,149 @@ const APIs = {
             }
         ]
     },
-    starships: {
-        name: 'Starships & Planets',
-        endpoint: SWAPI_ENDPOINT,
+    countries: {
+        name: 'Countries API',
+        endpoint: 'https://countries.trevorblades.com/graphql',
         examples: [
             {
-                title: 'All Starships',
-                description: 'List all starships',
-                query: `query AllStarships {
-  allStarships {
-    totalCount
-    starships {
+                title: 'All Countries',
+                description: 'Get country names and codes',
+                query: `query GetCountries {
+  countries {
+    code
+    name
+    capital
+    currency
+    emoji
+  }
+}`
+            },
+            {
+                title: 'Country Details',
+                description: 'Query a specific country',
+                query: `query GetCountry {
+  country(code: "US") {
+    name
+    native
+    capital
+    currency
+    languages {
+      code
       name
-      model
-      starshipClass
-      manufacturers
-      costInCredits
-      maxAtmospheringSpeed
-      hyperdriveRating
+    }
+    states {
+      name
     }
   }
 }`
             },
             {
-                title: 'All Planets',
-                description: 'Explore the galaxy',
-                query: `query AllPlanets {
-  allPlanets {
-    totalCount
-    planets {
+                title: 'Continents & Countries',
+                description: 'Nested continent data',
+                query: `query GetContinents {
+  continents {
+    code
+    name
+    countries {
       name
-      diameter
-      rotationPeriod
-      orbitalPeriod
-      gravity
-      population
-      climate
-      terrain
+      capital
+      emoji
     }
   }
 }`
             },
             {
-                title: 'All Vehicles',
-                description: 'Ground and air vehicles',
-                query: `query AllVehicles {
-  allVehicles {
-    totalCount
-    vehicles {
-      name
-      model
-      vehicleClass
-      manufacturers
-      costInCredits
-      maxAtmospheringSpeed
-      crew
-      passengers
+                title: 'Filter by Continent',
+                description: 'Countries in Europe',
+                query: `query EuropeanCountries {
+  countries(filter: { continent: { eq: "EU" } }) {
+    name
+    capital
+    currency
+    emoji
+  }
+}`
+            }
+        ]
+    },
+    anime: {
+        name: 'AniList API',
+        endpoint: 'https://graphql.anilist.co',
+        examples: [
+            {
+                title: 'Popular Anime',
+                description: 'Top anime by popularity',
+                query: `query PopularAnime {
+  Page(page: 1, perPage: 10) {
+    media(sort: POPULARITY_DESC, type: ANIME) {
+      id
+      title {
+        english
+        native
+      }
+      episodes
+      averageScore
+      genres
     }
   }
 }`
             },
             {
-                title: 'All Species',
-                description: 'Species across the galaxy',
-                query: `query AllSpecies {
-  allSpecies {
-    totalCount
-    species {
-      name
-      classification
-      designation
-      averageHeight
-      averageLifespan
-      language
-      homeworld {
+                title: 'Search Anime',
+                description: 'Find anime by name',
+                query: `query SearchAnime {
+  Media(search: "Attack on Titan", type: ANIME) {
+    id
+    title {
+      english
+      native
+    }
+    description
+    episodes
+    averageScore
+    genres
+    studios {
+      nodes {
         name
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Trending Now',
+                description: 'Currently trending anime',
+                query: `query TrendingAnime {
+  Page(page: 1, perPage: 5) {
+    media(sort: TRENDING_DESC, type: ANIME) {
+      id
+      title {
+        english
+      }
+      trending
+      popularity
+      averageScore
+      season
+      seasonYear
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime Characters',
+                description: 'Characters from a show',
+                query: `query AnimeCharacters {
+  Media(search: "Naruto", type: ANIME) {
+    title {
+      english
+    }
+    characters(page: 1, perPage: 10) {
+      nodes {
+        name {
+          full
+        }
+        gender
+        age
       }
     }
   }
@@ -253,7 +232,7 @@ const APIs = {
 };
 
 // State
-let currentAPI = 'characters';
+let currentAPI = 'rickmorty';
 
 // DOM Elements
 const apiSelector = document.getElementById('apiSelector');
