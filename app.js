@@ -3,16 +3,15 @@ const APIs = {
     rickmorty: {
         name: 'Rick & Morty API',
         endpoint: 'https://rickandmortyapi.com/graphql',
-        examples: [
+        simple: [
             {
-                title: 'All Characters',
-                description: 'Get characters with pagination',
+                title: 'List Characters',
+                description: 'Basic character data',
                 query: `query GetCharacters {
   characters(page: 1) {
     info {
       count
       pages
-      next
     }
     results {
       id
@@ -26,26 +25,52 @@ const APIs = {
             },
             {
                 title: 'Filter Characters',
-                description: 'Search by name and status',
+                description: 'Search by name or status',
                 query: `query FilterCharacters {
-  characters(filter: { name: "Rick", status: "Alive" }) {
+  characters(filter: { name: "Rick" }) {
     results {
-      id
       name
       status
+      species
+    }
+  }
+}`
+            },
+            {
+                title: 'Character Origin',
+                description: 'Where a character comes from',
+                query: `query CharacterOrigin {
+  characters(page: 1) {
+    results {
+      name
       origin {
         name
-      }
-      location {
-        name
+        type
+        dimension
       }
     }
   }
 }`
             },
             {
-                title: 'Episodes List',
-                description: 'Get episode information',
+                title: 'Character Location',
+                description: 'Where a character currently is',
+                query: `query CharacterLocation {
+  characters(page: 1) {
+    results {
+      name
+      location {
+        name
+        type
+        dimension
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'List Episodes',
+                description: 'Basic episode data',
                 query: `query GetEpisodes {
   episodes(page: 1) {
     results {
@@ -53,16 +78,13 @@ const APIs = {
       name
       air_date
       episode
-      characters {
-        name
-      }
     }
   }
 }`
             },
             {
-                title: 'Locations',
-                description: 'Explore different dimensions',
+                title: 'List Locations',
+                description: 'Basic location data',
                 query: `query GetLocations {
   locations(page: 1) {
     results {
@@ -70,8 +92,106 @@ const APIs = {
       name
       type
       dimension
+    }
+  }
+}`
+            },
+            {
+                title: 'Location Residents',
+                description: 'Who lives in a location',
+                query: `query LocationResidents {
+  locations(page: 1) {
+    results {
+      name
       residents {
         name
+        status
+      }
+    }
+  }
+}`
+            }
+        ],
+        advanced: [
+            {
+                title: 'Characters + Episodes',
+                description: 'Each character with all their episode appearances',
+                query: `query CharactersWithEpisodes {
+  characters(page: 1) {
+    results {
+      name
+      status
+      species
+      origin {
+        name
+        dimension
+      }
+      location {
+        name
+        type
+      }
+      episode {
+        name
+        episode
+        air_date
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Episodes + Full Cast',
+                description: 'Each episode with complete character details',
+                query: `query EpisodesWithCharacters {
+  episodes(page: 1) {
+    results {
+      name
+      episode
+      air_date
+      characters {
+        name
+        status
+        species
+        origin {
+          name
+        }
+        location {
+          name
+          dimension
+        }
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Character Journey',
+                description: 'Track a character across locations & episodes',
+                query: `query CharacterJourney {
+  characters(filter: { name: "Rick Sanchez" }) {
+    results {
+      name
+      status
+      origin {
+        name
+        type
+        dimension
+        residents {
+          name
+        }
+      }
+      location {
+        name
+        type
+        dimension
+      }
+      episode {
+        name
+        episode
+        characters {
+          name
+          species
+        }
       }
     }
   }
@@ -82,10 +202,10 @@ const APIs = {
     countries: {
         name: 'Countries API',
         endpoint: 'https://countries.trevorblades.com/graphql',
-        examples: [
+        simple: [
             {
-                title: 'All Countries',
-                description: 'Get country names and codes',
+                title: 'List Countries',
+                description: 'Basic country information',
                 query: `query GetCountries {
   countries {
     code
@@ -97,48 +217,156 @@ const APIs = {
 }`
             },
             {
-                title: 'Country Details',
-                description: 'Query a specific country',
+                title: 'Single Country',
+                description: 'Query one country by code',
                 query: `query GetCountry {
   country(code: "US") {
-    name
-    native
-    capital
-    currency
-    languages {
-      code
-      name
-    }
-    states {
-      name
-    }
-  }
-}`
-            },
-            {
-                title: 'Continents & Countries',
-                description: 'Nested continent data',
-                query: `query GetContinents {
-  continents {
-    code
-    name
-    countries {
-      name
-      capital
-      emoji
-    }
-  }
-}`
-            },
-            {
-                title: 'Filter by Continent',
-                description: 'Countries in Europe',
-                query: `query EuropeanCountries {
-  countries(filter: { continent: { eq: "EU" } }) {
     name
     capital
     currency
     emoji
+  }
+}`
+            },
+            {
+                title: 'Country Languages',
+                description: 'Languages spoken in a country',
+                query: `query CountryLanguages {
+  country(code: "CH") {
+    name
+    languages {
+      code
+      name
+      native
+    }
+  }
+}`
+            },
+            {
+                title: 'Country States',
+                description: 'States/provinces of a country',
+                query: `query CountryStates {
+  country(code: "US") {
+    name
+    states {
+      code
+      name
+    }
+  }
+}`
+            },
+            {
+                title: 'Country Continent',
+                description: 'Which continent a country belongs to',
+                query: `query CountryContinent {
+  country(code: "JP") {
+    name
+    continent {
+      code
+      name
+    }
+  }
+}`
+            },
+            {
+                title: 'List Continents',
+                description: 'All continents with codes',
+                query: `query GetContinents {
+  continents {
+    code
+    name
+  }
+}`
+            },
+            {
+                title: 'Filter Countries',
+                description: 'Countries by continent',
+                query: `query FilterByContinent {
+  countries(filter: { continent: { eq: "EU" } }) {
+    name
+    capital
+    emoji
+  }
+}`
+            }
+        ],
+        advanced: [
+            {
+                title: 'Continents + Countries + Languages',
+                description: 'Full hierarchy with all languages spoken',
+                query: `query ContinentsDeep {
+  continents {
+    name
+    countries {
+      name
+      capital
+      currency
+      emoji
+      languages {
+        name
+        native
+      }
+      states {
+        name
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Country Full Profile',
+                description: 'Everything about a country including neighbors',
+                query: `query CountryFullProfile {
+  country(code: "JP") {
+    name
+    native
+    capital
+    currency
+    phone
+    emoji
+    continent {
+      name
+      countries {
+        name
+        emoji
+      }
+    }
+    languages {
+      name
+      native
+      rtl
+    }
+    states {
+      name
+      code
+    }
+  }
+}`
+            },
+            {
+                title: 'Multi-Country Comparison',
+                description: 'Compare multiple countries using aliases',
+                query: `query CompareCountries {
+  usa: country(code: "US") {
+    name
+    capital
+    currency
+    languages { name }
+    states { name }
+  }
+  japan: country(code: "JP") {
+    name
+    capital
+    currency
+    languages { name }
+    states { name }
+  }
+  brazil: country(code: "BR") {
+    name
+    capital
+    currency
+    languages { name }
+    states { name }
   }
 }`
             }
@@ -147,18 +375,111 @@ const APIs = {
     anime: {
         name: 'AniList API',
         endpoint: 'https://graphql.anilist.co',
-        examples: [
+        simple: [
+            {
+                title: 'Search Anime',
+                description: 'Find anime by name',
+                query: `query SearchAnime {
+  Media(search: "Death Note", type: ANIME) {
+    title {
+      english
+      native
+    }
+    episodes
+    averageScore
+    genres
+    description
+  }
+}`
+            },
+            {
+                title: 'Anime Characters',
+                description: 'Characters from a show',
+                query: `query AnimeCharacters {
+  Media(search: "Death Note", type: ANIME) {
+    title { english }
+    characters(perPage: 10) {
+      nodes {
+        name { full }
+        gender
+        age
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime Staff',
+                description: 'Creators and crew',
+                query: `query AnimeStaff {
+  Media(search: "Death Note", type: ANIME) {
+    title { english }
+    staff(perPage: 10) {
+      nodes {
+        name { full }
+        primaryOccupations
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime Studios',
+                description: 'Production studios',
+                query: `query AnimeStudios {
+  Media(search: "Death Note", type: ANIME) {
+    title { english }
+    studios {
+      nodes {
+        name
+        isAnimationStudio
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime Relations',
+                description: 'Sequels, prequels, spin-offs',
+                query: `query AnimeRelations {
+  Media(search: "Attack on Titan", type: ANIME) {
+    title { english }
+    relations {
+      edges {
+        relationType
+        node {
+          title { english }
+          format
+        }
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime Recommendations',
+                description: 'Similar shows',
+                query: `query AnimeRecommendations {
+  Media(search: "Death Note", type: ANIME) {
+    title { english }
+    recommendations(perPage: 5) {
+      nodes {
+        mediaRecommendation {
+          title { english }
+          genres
+        }
+      }
+    }
+  }
+}`
+            },
             {
                 title: 'Popular Anime',
                 description: 'Top anime by popularity',
                 query: `query PopularAnime {
   Page(page: 1, perPage: 10) {
     media(sort: POPULARITY_DESC, type: ANIME) {
-      id
-      title {
-        english
-        native
-      }
+      title { english }
       episodes
       averageScore
       genres
@@ -167,14 +488,26 @@ const APIs = {
 }`
             },
             {
-                title: 'Search Anime',
-                description: 'Find anime by name',
-                query: `query SearchAnime {
-  Media(search: "Attack on Titan", type: ANIME) {
-    id
+                title: 'Search Studio',
+                description: 'Find a studio by name',
+                query: `query SearchStudio {
+  Studio(search: "MAPPA") {
+    name
+    isAnimationStudio
+  }
+}`
+            }
+        ],
+        advanced: [
+            {
+                title: 'Anime + Characters + Staff',
+                description: 'Full production details in one query',
+                query: `query AnimeFullDetails {
+  Media(search: "Death Note", type: ANIME) {
     title {
       english
       native
+      romaji
     }
     description
     episodes
@@ -183,45 +516,76 @@ const APIs = {
     studios {
       nodes {
         name
+        isAnimationStudio
       }
     }
-  }
-}`
-            },
-            {
-                title: 'Trending Now',
-                description: 'Currently trending anime',
-                query: `query TrendingAnime {
-  Page(page: 1, perPage: 5) {
-    media(sort: TRENDING_DESC, type: ANIME) {
-      id
-      title {
-        english
-      }
-      trending
-      popularity
-      averageScore
-      season
-      seasonYear
-    }
-  }
-}`
-            },
-            {
-                title: 'Anime Characters',
-                description: 'Characters from a show',
-                query: `query AnimeCharacters {
-  Media(search: "Naruto", type: ANIME) {
-    title {
-      english
-    }
-    characters(page: 1, perPage: 10) {
+    characters(perPage: 10) {
       nodes {
-        name {
-          full
-        }
+        name { full }
         gender
         age
+      }
+    }
+    staff(perPage: 5) {
+      nodes {
+        name { full }
+        primaryOccupations
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Anime + Relations + Recommendations',
+                description: 'Sequels, prequels, and similar shows',
+                query: `query AnimeRelations {
+  Media(search: "Attack on Titan", type: ANIME) {
+    title { english }
+    relations {
+      edges {
+        relationType
+        node {
+          title { english }
+          type
+          format
+          episodes
+          averageScore
+        }
+      }
+    }
+    recommendations(perPage: 5) {
+      nodes {
+        mediaRecommendation {
+          title { english }
+          averageScore
+          genres
+        }
+      }
+    }
+  }
+}`
+            },
+            {
+                title: 'Studio Portfolio',
+                description: 'All anime by a studio with nested data',
+                query: `query StudioPortfolio {
+  Studio(search: "MAPPA") {
+    name
+    isAnimationStudio
+    media(sort: POPULARITY_DESC, perPage: 10) {
+      nodes {
+        title { english }
+        format
+        episodes
+        averageScore
+        popularity
+        genres
+        seasonYear
+        characters(perPage: 3) {
+          nodes {
+            name { full }
+          }
+        }
       }
     }
   }
@@ -231,10 +595,9 @@ const APIs = {
     }
 };
 
-// State
 let currentAPI = 'rickmorty';
+let allExamples = [];
 
-// DOM Elements
 const apiSelector = document.getElementById('apiSelector');
 const examplesGrid = document.getElementById('examplesGrid');
 const queryEditor = document.getElementById('queryEditor');
@@ -248,46 +611,77 @@ const variablesPanel = document.getElementById('variablesPanel');
 const endpointDisplay = document.getElementById('endpointDisplay');
 const responseMeta = document.getElementById('responseMeta');
 
-// Initialize
 function init() {
     loadAPI(currentAPI);
     setupEventListeners();
 }
 
-// Load API
 function loadAPI(apiKey) {
     currentAPI = apiKey;
     const api = APIs[apiKey];
 
-    // Update active card
     document.querySelectorAll('.api-card').forEach(card => {
         card.classList.toggle('active', card.dataset.api === apiKey);
     });
 
-    // Update endpoint display
     endpointDisplay.textContent = api.endpoint;
 
-    // Load examples
-    examplesGrid.innerHTML = api.examples.map((example, index) => `
-    <div class="example-card" data-index="${index}">
-      <h4>${example.title}</h4>
-      <p>${example.description}</p>
-    </div>
-  `).join('');
+    // Combine examples with type info for index tracking
+    allExamples = [
+        ...api.simple.map(ex => ({ ...ex, type: 'simple' })),
+        ...api.advanced.map(ex => ({ ...ex, type: 'advanced' }))
+    ];
 
-    // Load first example
+    // Render both sections
+    const simpleCards = api.simple.map((example, index) => `
+        <div class="example-card" data-index="${index}">
+            <h4>${example.title}</h4>
+            <p>${example.description}</p>
+        </div>
+    `).join('');
+
+    const advancedCards = api.advanced.map((example, index) => `
+        <div class="example-card advanced" data-index="${api.simple.length + index}">
+            <span class="complexity-badge">Advanced</span>
+            <h4>${example.title}</h4>
+            <p>${example.description}</p>
+        </div>
+    `).join('');
+
+    examplesGrid.innerHTML = `
+        <div class="examples-category">
+            <div class="category-header">
+                <span class="category-icon">📘</span>
+                <span class="category-title">Basic Queries</span>
+                <span class="category-desc">Single-level data fetching</span>
+            </div>
+            <div class="category-cards">${simpleCards}</div>
+        </div>
+        <div class="examples-category advanced-category">
+            <div class="category-header">
+                <span class="category-icon">🚀</span>
+                <span class="category-title">Advanced Queries</span>
+                <span class="category-desc">Nested & relational data</span>
+            </div>
+            <div class="category-cards">${advancedCards}</div>
+        </div>
+    `;
+
     loadExample(0);
 }
 
-// Load Example
 function loadExample(index) {
-    const example = APIs[currentAPI].examples[index];
+    const example = allExamples[index];
     queryEditor.value = example.query;
     resultDisplay.innerHTML = '<span style="color: var(--text-secondary)">// Click "Execute Query" to see results</span>';
     responseMeta.textContent = '';
+
+    // Highlight selected card
+    document.querySelectorAll('.example-card').forEach(card => {
+        card.classList.toggle('selected', parseInt(card.dataset.index) === index);
+    });
 }
 
-// Execute Query
 async function executeQuery() {
     const query = queryEditor.value.trim();
     if (!query) {
@@ -306,7 +700,6 @@ async function executeQuery() {
         return;
     }
 
-    // Show loading state
     resultDisplay.innerHTML = '<div class="spinner"></div>';
     resultDisplay.classList.add('loading');
     responseMeta.textContent = 'Loading...';
@@ -343,12 +736,10 @@ async function executeQuery() {
     }
 }
 
-// Show Error
 function showError(message) {
     resultDisplay.innerHTML = `<span style="color: var(--error)">Error: ${message}</span>`;
 }
 
-// Syntax Highlighting for JSON
 function syntaxHighlight(json) {
     json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     return json.replace(
@@ -371,7 +762,6 @@ function syntaxHighlight(json) {
     );
 }
 
-// Prettify Query
 function prettifyQuery() {
     const query = queryEditor.value;
 
@@ -415,7 +805,6 @@ function prettifyQuery() {
     }
 }
 
-// Copy Result
 function copyResult() {
     const text = resultDisplay.innerText;
     navigator.clipboard.writeText(text).then(() => {
@@ -427,9 +816,7 @@ function copyResult() {
     });
 }
 
-// Setup Event Listeners
 function setupEventListeners() {
-    // API Selection
     apiSelector.addEventListener('click', (e) => {
         const card = e.target.closest('.api-card');
         if (card) {
@@ -437,7 +824,6 @@ function setupEventListeners() {
         }
     });
 
-    // Example Selection
     examplesGrid.addEventListener('click', (e) => {
         const card = e.target.closest('.example-card');
         if (card) {
@@ -445,17 +831,14 @@ function setupEventListeners() {
         }
     });
 
-    // Buttons
     executeBtn.addEventListener('click', executeQuery);
     prettifyBtn.addEventListener('click', prettifyQuery);
     copyBtn.addEventListener('click', copyResult);
 
-    // Variables Toggle
     variablesToggle.addEventListener('click', () => {
         variablesPanel.classList.toggle('show');
     });
 
-    // Keyboard shortcut (Ctrl/Cmd + Enter to execute)
     queryEditor.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
             executeQuery();
@@ -463,5 +846,4 @@ function setupEventListeners() {
     });
 }
 
-// Initialize the app
 init();
